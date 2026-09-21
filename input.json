@@ -1,0 +1,6 @@
+{
+  "nama" : "name",
+  "tanggalLahir": "date",
+  "alamat": "alamat",
+  "telepon": "phone"
+}
