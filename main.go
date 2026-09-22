@@ -43,6 +43,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if err := validateType(mapping); err != nil {
+		fmt.Printf("Error validating mapping: %v\n", err)
+		os.Exit(0)
+	}
+
 }
 
 func printUsage() {
@@ -83,11 +88,11 @@ func confirmOverwrite() {
 
 func readInput(path string, mapping *map[string]string) error {
 	if path == "" {
-		return errors.New("No input file specified")
+		return errors.New("no input file specified")
 	}
 
 	if mapping == nil {
-		return errors.New("No mapping spectified input file")
+		return errors.New("no input mapping specified")
 	}
 
 	file, err := os.Open(path)
@@ -102,11 +107,28 @@ func readInput(path string, mapping *map[string]string) error {
 	}
 
 	if len(fileByte) == 0 {
-		return errors.New("Empty input file")
+		return errors.New("no input file specified")
 	}
 
 	if err := json.Unmarshal(fileByte, &mapping); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func validateType(mapping map[string]string) error {
+	supported := map[string]bool{
+		"name":    true,
+		"date":    true,
+		"address": true,
+		"phone":   true,
+	}
+
+	for _, value := range mapping {
+		if !supported[value] {
+			return errors.New("type data not supported")
+		}
 	}
 
 	return nil
