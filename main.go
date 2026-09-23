@@ -112,7 +112,7 @@ func readInput(path string, mapping *map[string]string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	fileByte, err := io.ReadAll(file)
 	if err != nil {
@@ -160,7 +160,7 @@ func writeOutput(path string, result map[string]any) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	resultByte, err := json.MarshalIndent(result, "", "    ")
 	if err != nil {
