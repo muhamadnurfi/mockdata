@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/muhamadnurfi/mockdata/data"
 )
 
 func main() {
@@ -45,6 +47,17 @@ func main() {
 
 	if err := validateType(mapping); err != nil {
 		fmt.Printf("Error validating mapping: %v\n", err)
+		os.Exit(0)
+	}
+
+	result, err := generatingOutput(mapping)
+	if err != nil {
+		fmt.Printf("Error generating output: %v\n", err)
+		os.Exit(0)
+	}
+
+	if err := writeOutput(outputPath, result); err != nil {
+		fmt.Printf("Error write output: %v\n", err)
 		os.Exit(0)
 	}
 
@@ -118,17 +131,44 @@ func readInput(path string, mapping *map[string]string) error {
 }
 
 func validateType(mapping map[string]string) error {
-	supported := map[string]bool{
-		"name":    true,
-		"date":    true,
-		"address": true,
-		"phone":   true,
-	}
-
 	for _, value := range mapping {
-		if !supported[value] {
+		if !data.Supported[value] {
 			return errors.New("type data not supported")
 		}
+	}
+
+	return nil
+}
+
+func generatingOutput(mapping map[string]string) (map[string]any, error) {
+	result := make(map[string]any)
+
+	for key, dataType := range mapping {
+		result[key] = data.Generate(dataType)
+	}
+
+	return result, nil
+}
+
+func writeOutput(path string, result map[string]any) error {
+	if path == "" {
+		return errors.New("path invalid")
+	}
+
+	flags := os.O_RDWR | os.O_CREATE | os.O_TRUNC // operasi | itu adalah Operasi Inclusive. Pada dasarnya os itu adalah integer yang nanti diubah menjadi binary
+	file, err := os.OpenFile(path, flags, 0644)   // 0644 adalah pengaturan hak akses (file permission) pada sistem operasi berbasis Unix/Linux
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	resultByte, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := file.Write(resultByte); err != nil {
+		return err
 	}
 
 	return nil
